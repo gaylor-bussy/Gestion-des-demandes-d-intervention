@@ -5,7 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
+var protectRouter = require("./routes/protect");
 var usersRouter = require('./routes/users');
+var authentification = require("./middleware/authentifcation.js");
 
 var app = express();
 
@@ -21,7 +23,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
+app.use("/protect",authentification, protectRouter);
+app.listen(9000,()=>{
+  console.log("active au port 3000");
+})
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

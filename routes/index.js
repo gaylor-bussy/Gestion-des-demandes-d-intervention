@@ -1,8 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mysql = require('mysql2');
-const app = express();
-app.use(express.json());
+var moment = require('moment');
 
 
 
@@ -49,11 +48,11 @@ db.getConnection((err, connection) => {
 // });
 
 // Lancement du serveur
-const PORT = 3307;
+/*const PORT = 3307;
 app.listen(PORT, () => {
     console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
-
+*/
 
 // app.get('/users', (req, res) => {
 //     const sql = 'SELECT* FROM user_';
@@ -78,18 +77,45 @@ app.listen(PORT, () => {
 //   res.render('index', { title: 'Express' });
 // });
 
-app.post('/invite/request', (req, res) => {
-    const { nom_AFPA_invite, Prenom_AFPA_invite, Num_AFPA_invite } = req.body;
+router.post('/invite/request', (req, res) => {
 
+    const sql = `
+        INSERT INTO demande (
+            id_demande,
+            Description,
+            Date_creation,
+            Num_AFPA_invite,
+            Nom_AFPA_invite,
+            Prenom_AFPA_invite,
+            realise,
+            id_status,
+            id_demandeur,
+            id_technicien,
+            id_validateur
+        )
+        VALUES (NULL, '`+ req.body.Description + `', '` + moment().format("YYYY-MM-DD") + `', '`+ req.body.Num_AFPA_invite + `', '`+ req.body.Nom_AFPA_invite + `', '`+ req.body.Prenom_AFPA_invite + `', '0', NULL, NULL, NULL, NULL)
+    `;
 
-    const sql = "INSERT INTO `demande`(`id_demande`, `Description`, `Date_creation`, `Num_AFPA_invite`, `Nom_AFPA_invite`, `Prenom_AFPA_invite`, `realise`, `id_status`, `id_demandeur`, `id_technicien`, `id_validateur`) VALUES ('[value-1]','[value-2]','[value-3]','[value-4]','[value-5]','[value-6]','[value-7]','[value-8]','[value-9]','[value-10]','[value-11]')";
-    db.query(sql, [nom_AFPA_invite, Prenom_AFPA_invite, Num_AFPA_invite], (err, result) => {
-        if (err) {
-            console.error('Erreur lors de l’insertion :', err.message);
-            return res.status(500).json({ error: 'Erreur serveur' });
+    db.query(
+        sql,
+        (err, result) => {
+            if (err) {
+                console.error("Erreur SQL :", err);
+
+                return res.status(500).json({
+                    message: err.message,
+                    code: err.code,
+                    sqlMessage: err.sqlMessage
+                });
+            } else {
+                return res.status(200).json({
+                    message: 'Demande ajoutée',
+                    code: 'OK'
+
+                });
+            }
         }
-        res.status(201).json({ message: 'Demande effectuer', id: result.insertId });
-    });
+    )
 });
 
 
@@ -97,10 +123,8 @@ app.post('/invite/request', (req, res) => {
 
 
 
-
-
 // /* GET NbRequest page. */
-app.get('/invite/request/:NbRequest', (req, res) => {
+router.get('/invite/request/:NbRequest', (req, res) => {
     const NbRequest = req.params.NbRequest;
     const sql = "SELECT * FROM demande WHERE id_demande = ?";
     db.query(sql, [NbRequest], (err, results) => {
@@ -117,10 +141,9 @@ app.get('/invite/request/:NbRequest', (req, res) => {
 
 
 
-// /* GET login page. */
-// router.post('/login', function(req, res, next) {
-//   res.render('index', { title: 'Express' });
-// });
+
+
+
 
 
 
@@ -138,7 +161,7 @@ app.get('/invite/request/:NbRequest', (req, res) => {
 
 
 
-app.get('/dashboard', (req, res) => {
+router.get('/dashboard', (req, res) => {
     const sql = "SELECT *  FROM `demande` "
 
     db.query(sql, (err, results) => {
