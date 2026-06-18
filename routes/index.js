@@ -78,12 +78,12 @@ app.listen(PORT, () => {
 //   res.render('index', { title: 'Express' });
 // });
 
- app.post('/invite/request', (req, res) => {
-    const { nom_AFPA_invite,Prenom_AFPA_invite ,Num_AFPA_invite} = req.body;
+app.post('/invite/request', (req, res) => {
+    const { nom_AFPA_invite, Prenom_AFPA_invite, Num_AFPA_invite } = req.body;
 
-  
+
     const sql = "INSERT INTO `demande`(`id_demande`, `Description`, `Date_creation`, `Num_AFPA_invite`, `Nom_AFPA_invite`, `Prenom_AFPA_invite`, `realise`, `id_status`, `id_demandeur`, `id_technicien`, `id_validateur`) VALUES ('[value-1]','[value-2]','[value-3]','[value-4]','[value-5]','[value-6]','[value-7]','[value-8]','[value-9]','[value-10]','[value-11]')";
-    db.query(sql, [nom_AFPA_invite,Prenom_AFPA_invite ,Num_AFPA_invite], (err, result) => {
+    db.query(sql, [nom_AFPA_invite, Prenom_AFPA_invite, Num_AFPA_invite], (err, result) => {
         if (err) {
             console.error('Erreur lors de l’insertion :', err.message);
             return res.status(500).json({ error: 'Erreur serveur' });
@@ -101,8 +101,9 @@ app.listen(PORT, () => {
 
 // /* GET NbRequest page. */
 app.get('/invite/request/:NbRequest', (req, res) => {
- const sql = "SELECT id_demande,Description,Date_creation,Nom,id_status  FROM `demande` INNER JOIN `user_` ON(demande.id_demandeur=user_.id_user) WHERE Nom_AFPA_invite OR Num_AFPA_invite OR Prenom_AFPA_invite"
-  db.query(sql, (err, results) => {
+    const NbRequest = req.params.NbRequest;
+    const sql = "SELECT * FROM demande WHERE id_demande = ?";
+    db.query(sql, [NbRequest], (err, results) => {
         if (err) {
             console.error('Erreur lors de la requête :', err.message);
             return res.status(500).json({ error: 'Erreur serveur' });
@@ -110,7 +111,6 @@ app.get('/invite/request/:NbRequest', (req, res) => {
         res.json(results);
     });
 });
-
 
 
 
@@ -139,7 +139,7 @@ app.get('/invite/request/:NbRequest', (req, res) => {
 
 
 app.get('/dashboard', (req, res) => {
-    const sql = "SELECT *  FROM `demande` INNER JOIN `user_` ON(demande.id_demandeur=user_.id_user) WHERE id_validateur LIKE '1' OR id_technicien LIKE '1' "
+    const sql = "SELECT *  FROM `demande` "
 
     db.query(sql, (err, results) => {
         if (err) {
